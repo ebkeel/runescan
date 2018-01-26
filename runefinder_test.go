@@ -137,7 +137,7 @@ func TestGetUCDPath_isSet(t *testing.T) {
 	os.Setenv("UCD_PATH", ucdPath)                                            // ➍
 	got := getUCDPath()                                                       // ➎
 	if got != ucdPath {
-		t.Errorf("getUCDPath() [setado]\nwant: %q; got: %q", ucdPath, got)
+		t.Errorf("getUCDPath() [set]\nwant: %q; got: %q", ucdPath, got)
 	}
 }
 
@@ -156,7 +156,7 @@ func TestOpenUCD_local(t *testing.T) {
 	ucdPath := getUCDPath()
 	ucd, err := openUCD(ucdPath)
 	if err != nil {
-		t.Errorf("AbrirUCD(%q):\n%v", ucdPath, err)
+		t.Errorf("openUCD(%q):\n%v", ucdPath, err)
 	}
 	ucd.Close()
 }
@@ -174,7 +174,7 @@ func TestFetchUCD(t *testing.T) {
 	_ = <-done                          // ➌
 	ucd, err := os.Open(ucdPath)
 	if os.IsNotExist(err) {
-		t.Errorf("fetchUCD não gerou:%v\n%v", ucdPath, err)
+		t.Errorf("fetchUCD did not save:%v\n%v", ucdPath, err)
 	}
 	ucd.Close()
 	os.Remove(ucdPath)
@@ -182,12 +182,12 @@ func TestFetchUCD(t *testing.T) {
 
 func TestOpenUCD_remote(t *testing.T) {
 	if testing.Short() { // ➊
-		t.Skip("teste ignorado [opção -test.short]") // ➋
+		t.Skip("skipped test [-test.short option]") // ➋
 	}
 	ucdPath := fmt.Sprintf("./TEST%d-UnicodeData.txt", time.Now().UnixNano()) // ➌
 	ucd, err := openUCD(ucdPath)
 	if err != nil {
-		t.Errorf("AbrirUCD(%q):\n%v", ucdPath, err)
+		t.Errorf("openUCD(%q):\n%v", ucdPath, err)
 	}
 	ucd.Close()
 	os.Remove(ucdPath)

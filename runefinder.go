@@ -99,7 +99,7 @@ const UCD_URL = "https://standupdev.com/data/UnicodeData.txt"
 func openUCD(path string) (*os.File, error) {
 	ucd, err := os.Open(path)
 	if os.IsNotExist(err) { // ➊
-		fmt.Printf("%s não encontrado\nbaixando %s\n", path, UCD_URL)
+		fmt.Printf("%s not found\ndownloading %s\n", path, UCD_URL)
 		done := make(chan bool)          // ➊
 		go fetchUCD(UCD_URL, path, done) // ➋
 		progress(done)                   // ➌
