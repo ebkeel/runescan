@@ -1,6 +1,6 @@
 argsAntes	argsBefore
-caso	case
-casos	cases
+caso	tc
+casos	testCases
 código	code
 contém	contains
 contémTodos	containsAll

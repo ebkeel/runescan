@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 names = []
 
 with open('names.txt') as fp:
