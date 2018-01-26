@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/standupdev/wordset"
 )
 
 const lineLetterA = "0041;LATIN CAPITAL LETTER A;Lu;0;L;;;;;N;;;;0061;"
@@ -26,31 +28,34 @@ const lines3Dto43 = `
 func TestParseLine(t *testing.T) {
 	rune, name, words := ParseLine(lineLetterA) // ➊
 	if rune != 'A' {
-		t.Errorf("Esperado: 'A'; got: %q", rune)
+		t.Errorf("Want: 'A'; got: %q", rune)
 	}
 	const nameA = "LATIN CAPITAL LETTER A"
 	if name != nameA {
-		t.Errorf("Esperado: %q; got: %q", nameA, name)
+		t.Errorf("Want: %q; got: %q", nameA, name)
 	}
-	wordsA := []string{"LATIN", "CAPITAL", "LETTER", "A"} // ➋
-	if !reflect.DeepEqual(words, wordsA) {             // ➌
-		t.Errorf("\n\tEsperado: %q\n\tgot: %q", wordsA, words) // ➍
+	wordsA := wordset.MakeFromText(nameA) // ➋
+	if !wordsA.Equal(words) {             // ➌
+		t.Errorf("\n\tWant: %q\n\tgot: %q", wordsA, words) // ➍
 	}
 }
 
 func TestParseLineWithHyphenAndField10(t *testing.T) {
 	var testCases = []struct { // ➊
-		line    string
-		rune     rune
-		name     string
-		words []string
+		line  string
+		rune  rune
+		name  string
+		words wordset.Set
 	}{ // ➋
 		{"0021;EXCLAMATION MARK;Po;0;ON;;;;;N;;;;;",
-			'!', "EXCLAMATION MARK", []string{"EXCLAMATION", "MARK"}},
+			'!', "EXCLAMATION MARK",
+			wordset.MakeFromText("EXCLAMATION MARK")},
 		{"002D;HYPHEN-MINUS;Pd;0;ES;;;;;N;;;;;",
-			'-', "HYPHEN-MINUS", []string{"HYPHEN", "MINUS"}},
+			'-', "HYPHEN-MINUS",
+			wordset.MakeFromText("HYPHEN MINUS")},
 		{"0027;APOSTROPHE;Po;0;ON;;;;;N;APOSTROPHE-QUOTE;;;",
-			'\'', "APOSTROPHE (APOSTROPHE-QUOTE)", []string{"APOSTROPHE", "QUOTE"}},
+			'\'', "APOSTROPHE (APOSTROPHE-QUOTE)", 
+			wordset.MakeFromText("APOSTROPHE QUOTE")},
 	}
 	for _, tc := range testCases { // ➌
 		rune, name, words := ParseLine(tc.line) // ➍
@@ -62,65 +67,6 @@ func TestParseLineWithHyphenAndField10(t *testing.T) {
 	}
 }
 
-func TestContains(t *testing.T) {
-	testCases := []struct { // ➊
-		slice     []string
-		needle string
-		want  bool
-	}{ // ➋
-		{[]string{"A", "B"}, "B", true},
-		{[]string{}, "A", false},
-		{[]string{"A", "B"}, "Z", false}, // ➌
-	} // ➍
-	for _, tc := range testCases { // ➎
-		got := contains(tc.slice, tc.needle) // ➏
-		if got != tc.want {                 // ➐
-			t.Errorf("contains(%#v, %#v) want: %v; got: %v",
-				tc.slice, tc.needle, tc.want, got) // ➑
-		}
-	}
-}
-
-func TestContainsAll(t *testing.T) {
-	testCases := []struct { // ➊
-		slice      []string
-		needles []string
-		want   bool
-	}{ // ➋
-		{[]string{"A", "B"}, []string{"B"}, true},
-		{[]string{}, []string{"A"}, false},
-		{[]string{"A"}, []string{}, true}, // ➌
-		{[]string{"A", "B"}, []string{"Z"}, false},
-		{[]string{"A", "B", "C"}, []string{"A", "C"}, true},
-		{[]string{"A", "B", "C"}, []string{"A", "Z"}, false},
-		{[]string{"A", "B"}, []string{"A", "B", "C"}, false},
-	}
-	for _, tc := range testCases {
-		got := containsAll(tc.slice, tc.needles) // ➍
-		if got != tc.want {
-			t.Errorf("containsAll(%#v, %#v)\nwant: %v; got: %v",
-				tc.slice, tc.needles, tc.want, got) // ➎
-		}
-	}
-}
-
-func TestSplit(t *testing.T) {
-	testCases := []struct {
-		text    string
-		want []string
-	}{
-		{"A", []string{"A"}},
-		{"A B", []string{"A", "B"}},
-		{"A B-C", []string{"A", "B", "C"}},
-	}
-	for _, tc := range testCases {
-		got := split(tc.text)
-		if !reflect.DeepEqual(got, tc.want) {
-			t.Errorf("split(%q)\nwant: %#v; got: %#v",
-				tc.text, tc.want, got)
-		}
-	}
-}
 
 func ExampleList() {
 	text := strings.NewReader(lines3Dto43)
@@ -185,11 +131,11 @@ func restore(nameVar, value string, existed bool) {
 }
 
 func TestGetUCDPath_isSet(t *testing.T) {
-	pathBefore, existed := os.LookupEnv("UCD_PATH")                            // ➊
-	defer restore("UCD_PATH", pathBefore, existed)                           // ➋
+	pathBefore, existed := os.LookupEnv("UCD_PATH")                           // ➊
+	defer restore("UCD_PATH", pathBefore, existed)                            // ➋
 	ucdPath := fmt.Sprintf("./TEST%d-UnicodeData.txt", time.Now().UnixNano()) // ➌
 	os.Setenv("UCD_PATH", ucdPath)                                            // ➍
-	got := getUCDPath()                                                  // ➎
+	got := getUCDPath()                                                       // ➎
 	if got != ucdPath {
 		t.Errorf("getUCDPath() [setado]\nwant: %q; got: %q", ucdPath, got)
 	}
@@ -198,7 +144,7 @@ func TestGetUCDPath_isSet(t *testing.T) {
 func TestGetUCDPath_default(t *testing.T) {
 	pathBefore, existed := os.LookupEnv("UCD_PATH")
 	defer restore("UCD_PATH", pathBefore, existed)
-	os.Unsetenv("UCD_PATH")                // ➊
+	os.Unsetenv("UCD_PATH")             // ➊
 	ucdPathSuffix := "/UnicodeData.txt" // ➋
 	got := getUCDPath()
 	if !strings.HasSuffix(got, ucdPathSuffix) { // ➌
@@ -223,9 +169,9 @@ func TestFetchUCD(t *testing.T) {
 	defer srv.Close()
 
 	ucdPath := fmt.Sprintf("./TEST%d-UnicodeData.txt", time.Now().UnixNano())
-	done := make(chan bool)                 // ➊
+	done := make(chan bool)             // ➊
 	go fetchUCD(srv.URL, ucdPath, done) // ➋
-	_ = <-done                              // ➌
+	_ = <-done                          // ➌
 	ucd, err := os.Open(ucdPath)
 	if os.IsNotExist(err) {
 		t.Errorf("fetchUCD não gerou:%v\n%v", ucdPath, err)

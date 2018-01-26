@@ -11,55 +11,30 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/standupdev/wordset"
 )
 
 // ParseLine devolve a rune, o name e uma slice de words que
 // ocorrem no campo name de uma line do UnicodeData.txt
-func ParseLine(line string) (rune, string, []string) {
+func ParseLine(line string) (rune, string, wordset.Set) {
 	fields := strings.Split(line, ";")
 	code, _ := strconv.ParseInt(fields[0], 16, 32)
 	name := fields[1]
-	words := split(fields[1])
+	wordStr := strings.Replace(fields[1], "-", " ", -1)
+	words := wordset.MakeFromText(wordStr)
 	if fields[10] != "" { // ➊
 		name += fmt.Sprintf(" (%s)", fields[10])
-		for _, word := range split(fields[10]) { // ➋
-			if !contains(words, word) { // ➌
-				words = append(words, word) // ➍
-			}
-		}
+		wordStr = strings.Replace(fields[10], "-", " ", -1)
+		words.Update(wordset.MakeFromText(wordStr))
 	}
 	return rune(code), name, words
-}
-
-func contains(slice []string, needle string) bool {
-	for _, item := range slice {
-		if item == needle {
-			return true // ➋
-		}
-	}
-	return false // ➌
-}
-
-func containsAll(slice []string, needles []string) bool {
-	for _, needle := range needles {
-		if !contains(slice, needle) {
-			return false
-		}
-	}
-	return true
-}
-
-func split(s string) []string { // ➊
-	separator := func(c rune) bool { // ➋
-		return c == ' ' || c == '-'
-	}
-	return strings.FieldsFunc(s, separator) // ➌
 }
 
 // List exibe na saída padrão o code, a rune e o name dos caracteres Unicode
 // cujo name contem as words da query.
 func List(text io.Reader, query string) {
-	terms := split(query)
+	terms := wordset.MakeFromText(query)
 	scanner := bufio.NewScanner(text)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -67,7 +42,7 @@ func List(text io.Reader, query string) {
 			continue
 		}
 		rune, name, wordsName := ParseLine(line) // ➊
-		if containsAll(wordsName, terms) {           // ➋
+		if terms.IsSubSetOf(wordsName) {       // ➋
 			fmt.Printf("U+%04X\t%[1]c\t%s\n", rune, name)
 		}
 	}
@@ -76,8 +51,8 @@ func List(text io.Reader, query string) {
 func getUCDPath() string {
 	ucdPath := os.Getenv("UCD_PATH")
 	if ucdPath == "" { // ➊
-		user, err := user.Current()                    // ➋
-		terminarSe(err)                                   // ➌
+		user, err := user.Current()                 // ➋
+		terminarSe(err)                             // ➌
 		ucdPath = user.HomeDir + "/UnicodeData.txt" // ➍
 	}
 	return ucdPath
@@ -123,10 +98,10 @@ func openUCD(path string) (*os.File, error) {
 	ucd, err := os.Open(path)
 	if os.IsNotExist(err) { // ➊
 		fmt.Printf("%s não encontrado\nbaixando %s\n", path, UCD_URL)
-		done := make(chan bool)             // ➊
+		done := make(chan bool)          // ➊
 		go fetchUCD(UCD_URL, path, done) // ➋
-		progress(done)                     // ➌
-		ucd, err = os.Open(path)          // ➌
+		progress(done)                   // ➌
+		ucd, err = os.Open(path)         // ➌
 	}
 	return ucd, err // ➍
 }

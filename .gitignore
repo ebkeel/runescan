@@ -1,6 +1,10 @@
 # LR
 .vscode
 
+# executables
+runes
+runes.exe
+
 __pycache__/
 .DS_Store
 
