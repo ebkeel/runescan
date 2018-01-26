@@ -16,7 +16,7 @@ import (
 )
 
 // ParseLine parses a line in the UnicodeData.txt file returning
-// the rune, the name and a set of words build from the name. 
+// the rune, the name and a set of words build from the name.
 func ParseLine(line string) (rune, string, wordset.Set) {
 	fields := strings.Split(line, ";")
 	code, _ := strconv.ParseInt(fields[0], 16, 32)
@@ -31,9 +31,11 @@ func ParseLine(line string) (rune, string, wordset.Set) {
 	return rune(code), name, words
 }
 
-// List displays the codepoint, the character and the name of the
-// Unicode characters whose name cointain all words in the query.
-func List(text io.Reader, query string) {
+// filter returns a list with the codepoint, the character and
+// the name of the Unicode characters whose name cointain all
+// words in the query.
+func filter(text io.Reader, query string) [][3]string {
+	var result [][3]string
 	terms := wordset.MakeFromText(query)
 	scanner := bufio.NewScanner(text)
 	for scanner.Scan() {
@@ -43,16 +45,27 @@ func List(text io.Reader, query string) {
 		}
 		char, name, wordsName := ParseLine(line) // ➊
 		if terms.IsSubSetOf(wordsName) {         // ➋
-			fmt.Printf("U+%04X\t%[1]c\t%s\n", char, name)
+			result = append(result,
+				[3]string{fmt.Sprintf("U+%04X", char),
+					string(char), name})
 		}
+	}
+	return result
+}
+
+// List displays the codepoint, the character and the name of the
+// Unicode characters whose name cointain all words in the query.
+func List(text io.Reader, query string) {
+	for _, fields := range filter(text, query) {
+		fmt.Printf("%s\t%s\t%s\n", fields[0], fields[1], fields[2])
 	}
 }
 
 func getUCDPath() string {
 	ucdPath := os.Getenv("UCD_PATH")
-	if ucdPath == "" {                // ➊
-		user, err := user.Current()   // ➋
-		failIf(err)                   // ➌
+	if ucdPath == "" { // ➊
+		user, err := user.Current()                 // ➋
+		failIf(err)                                 // ➌
 		ucdPath = user.HomeDir + "/UnicodeData.txt" // ➍
 	}
 	return ucdPath
@@ -89,12 +102,10 @@ func progress(done <-chan bool) { // ➊
 	}
 }
 
-// The canonical URL for the Unicode Database is
-// http://www.unicode.org/Public/UNIDATA/UnicodeData.txt
-// However, unicode.org is often off-line, so this alternative
-// URL can be used:
+// UCD_URL is the canonical URL for the Unicode Database.
+// If unicode.org is off-line, use this alternative URL
 // https://standupdev.com/data/UnicodeData.txt
-const UCD_URL = "https://standupdev.com/data/UnicodeData.txt"
+const UCD_URL = "http://www.unicode.org/Public/UNIDATA/UnicodeData.txt"
 
 func openUCD(path string) (*os.File, error) {
 	ucd, err := os.Open(path)
@@ -115,5 +126,5 @@ func main() {
 	}
 	defer ucd.Close()
 	query := strings.Join(os.Args[1:], " ")
-	List(ucd, strings.ToUpper(query))
+	List(ucd, query)
 }

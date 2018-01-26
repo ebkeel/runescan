@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -43,7 +42,7 @@ func TestParseLine(t *testing.T) {
 func TestParseLineWithHyphenAndField10(t *testing.T) {
 	var testCases = []struct { // ➊
 		line  string
-		rune  rune
+		char  rune
 		name  string
 		words wordset.Set
 	}{ // ➋
@@ -54,19 +53,21 @@ func TestParseLineWithHyphenAndField10(t *testing.T) {
 			'-', "HYPHEN-MINUS",
 			wordset.MakeFromText("HYPHEN MINUS")},
 		{"0027;APOSTROPHE;Po;0;ON;;;;;N;APOSTROPHE-QUOTE;;;",
-			'\'', "APOSTROPHE (APOSTROPHE-QUOTE)", 
+			'\'', "APOSTROPHE (APOSTROPHE-QUOTE)",
 			wordset.MakeFromText("APOSTROPHE QUOTE")},
 	}
+
 	for _, tc := range testCases { // ➌
-		rune, name, words := ParseLine(tc.line) // ➍
-		if rune != tc.rune || name != tc.name ||
-			!reflect.DeepEqual(words, tc.words) {
-			t.Errorf("\nParseLine(%q)\n-> (%q, %q, %q)", // ➎
-				tc.line, rune, name, words)
-		}
+		t.Run("case "+string(tc.char), func(t *testing.T) {
+			char, name, words := ParseLine(tc.line) // ➍
+			if char != tc.char || name != tc.name ||
+				!words.Equal(tc.words) {
+				t.Errorf("\nParseLine(%q)\n-> (%q, %q, %q)", // ➎
+					tc.line, char, name, words)
+			}
+		})
 	}
 }
-
 
 func ExampleList() {
 	text := strings.NewReader(lines3Dto43)
