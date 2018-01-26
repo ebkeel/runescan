@@ -15,8 +15,8 @@ import (
 	"github.com/standupdev/wordset"
 )
 
-// ParseLine devolve a rune, o name e uma slice de words que
-// ocorrem no campo name de uma line do UnicodeData.txt
+// ParseLine parses a line in the UnicodeData.txt file returning
+// the rune, the name and a set of words build from the name. 
 func ParseLine(line string) (rune, string, wordset.Set) {
 	fields := strings.Split(line, ";")
 	code, _ := strconv.ParseInt(fields[0], 16, 32)
@@ -31,8 +31,8 @@ func ParseLine(line string) (rune, string, wordset.Set) {
 	return rune(code), name, words
 }
 
-// List exibe na saída padrão o code, a rune e o name dos caracteres Unicode
-// cujo name contem as words da query.
+// List displays the codepoint, the character and the name of the
+// Unicode characters whose name cointain all words in the query.
 func List(text io.Reader, query string) {
 	terms := wordset.MakeFromText(query)
 	scanner := bufio.NewScanner(text)
@@ -41,24 +41,24 @@ func List(text io.Reader, query string) {
 		if strings.TrimSpace(line) == "" {
 			continue
 		}
-		rune, name, wordsName := ParseLine(line) // ➊
-		if terms.IsSubSetOf(wordsName) {       // ➋
-			fmt.Printf("U+%04X\t%[1]c\t%s\n", rune, name)
+		char, name, wordsName := ParseLine(line) // ➊
+		if terms.IsSubSetOf(wordsName) {         // ➋
+			fmt.Printf("U+%04X\t%[1]c\t%s\n", char, name)
 		}
 	}
 }
 
 func getUCDPath() string {
 	ucdPath := os.Getenv("UCD_PATH")
-	if ucdPath == "" { // ➊
-		user, err := user.Current()                 // ➋
-		terminarSe(err)                             // ➌
+	if ucdPath == "" {                // ➊
+		user, err := user.Current()   // ➋
+		failIf(err)                   // ➌
 		ucdPath = user.HomeDir + "/UnicodeData.txt" // ➍
 	}
 	return ucdPath
 }
 
-func terminarSe(err error) {
+func failIf(err error) {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -66,13 +66,13 @@ func terminarSe(err error) {
 
 func fetchUCD(url, path string, done chan<- bool) { // ➊
 	response, err := http.Get(url)
-	terminarSe(err)
+	failIf(err)
 	defer response.Body.Close()
 	file, err := os.Create(path)
-	terminarSe(err)
+	failIf(err)
 	defer file.Close()
 	_, err = io.Copy(file, response.Body)
-	terminarSe(err)
+	failIf(err)
 	done <- true // ➋
 }
 
@@ -89,10 +89,12 @@ func progress(done <-chan bool) { // ➊
 	}
 }
 
-// UCD_URL fica em http://www.unicode.org/Public/UNIDATA/UnicodeData.txt
-// mas unicode.org não é confiável, então esta URL alternativa pode ser usada:
-// http://turing.com.br/etc/UnicodeData.txt
-const UCD_URL = "http://turing.com.br/etc/UnicodeData.txt"
+// The canonical URL for the Unicode Database is
+// http://www.unicode.org/Public/UNIDATA/UnicodeData.txt
+// However, unicode.org is often off-line, so this alternative
+// URL can be used:
+// https://standupdev.com/data/UnicodeData.txt
+const UCD_URL = "https://standupdev.com/data/UnicodeData.txt"
 
 func openUCD(path string) (*os.File, error) {
 	ucd, err := os.Open(path)
