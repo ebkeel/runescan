@@ -1,18 +1,17 @@
-# sinais: passo a passo com TDD
+# runes: example for a gentle introduction to TDD in Go
 
-Neste repositório você pode ver o desenvolvimento passo a passo do exemplo `sinais`: um utilitário em Go para localizar caracteres Unicode pelo nome.
+In this repo you will find the step-by-step development of the `runes` example: a command-line utility to find Unicode characters by name.
 
-Cada etapa do desenvolvimento é documentada explicando os recursos da linguagem Go usados no código do exemplo.
+Each step in the development is documented explaining the Go language features used in the code.
 
-Você não precisa saber nada de Go para acompanhar. Os requisitos são conhecer alguma linguagem de programação moderna.
+Only a very basic knowdledge of Go is required to follow.
 
+## Our goal
 
-## Nosso objetivo
-
-Ao final desse tutorial, teremos um utilitário de linha de comando que faz isso:
+By the end of this tutorial, we'll have a command-line utility which works like this:
 
 ```
-$ sinais face eyes
+$ runes face eyes
 U+1F601	😁	GRINNING FACE WITH SMILING EYES
 U+1F604	😄	SMILING FACE WITH OPEN MOUTH AND SMILING EYES
 U+1F606	😆	SMILING FACE WITH OPEN MOUTH AND TIGHTLY-CLOSED EYES
@@ -27,11 +26,11 @@ U+1F63D	😽	KISSING CAT FACE WITH CLOSED EYES
 U+1F644	🙄	FACE WITH ROLLING EYES
 ```
 
-Você passa uma um mais palavras como argumento, e o programa devolve uma lista ordenada de caracteres Unicode cujas descrições contém todas as palavras que você passou.
+You give `runes` one or more words as arguments, and it displays a list of Unicode characters whose names contains all the words you provided.
 
-Leia mais nas [páginas do projeto](https://ThoughtWorksInc.github.io/sinais/).
+Learn more in the [project page (in Portuguese for now)](https://ThoughtWorksInc.github.io/sinais/).
 
 
-## Créditos
+## Credits
 
-Este tutorial é baseado no exemplo `charfinder` do capítulo 18 de [Python Fluente](http://novatec.com.br/livros/pythonfluente/), de Luciano Ramalho. A versão Go, chamada `runefinder`, foi iniciada no grupo de estudos [Garoa Gophers](https://garoa.net.br/wiki/Garoa_Gophers), com a participação de Afonso Coutinho (@afonso), Alexandre Souza (@alexandre), Andrews Medina (@andrewsmedina), João "JC" Martins (@jcmartins), Luciano Ramalho (@ramalho), Marcio Ribeiro (@mmr) e Michael Howard.
+This tutorial is based in the `charfinder` example from chapter 18 of [Fluent Python](https://www.amazon.com/_/dp/1491946008), by Luciano Ramalho. The Go version named `runefinder`, was started in the [Garoa Gophers](https://garoa.net.br/wiki/Garoa_Gophers), study group by Afonso Coutinho (@afonso), Alexandre Souza (@alexandre), Andrews Medina (@andrewsmedina), João "JC" Martins (@jcmartins), Luciano Ramalho (@ramalho), Marcio Ribeiro (@mmr), and Michael Howard.
