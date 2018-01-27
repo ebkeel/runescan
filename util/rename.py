@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import sys
+
 names = []
 
 with open('names.txt') as fp:
@@ -14,8 +16,10 @@ names = sorted(names, key=pt_len, reverse=True)
 
 srcs = 'runefinder.go runefinder_test.go'.split()
 
+n = int(sys.argv[1])
+
 for src in srcs:
-    src = '../' + src
+    src = '../sinais{:02d}/{}'.format(n, src)
     with open(src) as fp:
         txt = fp.read()
         for pt, en in names:

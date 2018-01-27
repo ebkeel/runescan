@@ -34,7 +34,7 @@ progresso	progress
 consulta	query
 resposta	response
 restaurar	restore
-runa	rune
+runa	char
 varredor	scanner
 separador	separator
 fatia	slice
