@@ -1,4 +1,4 @@
-# runes: example for a gentle introduction to TDD in Go
+# `runes`: A gentle introduction to TDD in Go
 
 In this repo you will find the step-by-step development of the `runes` example: a command-line utility to find Unicode characters by name.
 
