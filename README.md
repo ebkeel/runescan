@@ -1,6 +1,6 @@
 # `runes`: A gentle introduction to TDD in Go
 
-In this repo you will find the step-by-step development of the `runes` example: a command-line utility to find Unicode characters by name.
+In this repo you will find the step-by-step, test-driven development of the `runes` example: a command-line utility to find Unicode characters by name.
 
 Each step in the development is documented explaining the Go language features used in the code.
 
