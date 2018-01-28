@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -13,16 +14,6 @@ import (
 )
 
 const lineLetterA = "0041;LATIN CAPITAL LETTER A;Lu;0;L;;;;;N;;;;0061;"
-
-const lines3Dto43 = `
-003D;EQUALS SIGN;Sm;0;ON;;;;;N;;;;;
-003E;GREATER-THAN SIGN;Sm;0;ON;;;;;Y;;;;;
-003F;QUESTION MARK;Po;0;ON;;;;;N;;;;;
-0040;COMMERCIAL AT;Po;0;ON;;;;;N;;;;;
-0041;LATIN CAPITAL LETTER A;Lu;0;L;;;;;N;;;;0061;
-0042;LATIN CAPITAL LETTER B;Lu;0;L;;;;;N;;;;0062;
-0043;LATIN CAPITAL LETTER C;Lu;0;L;;;;;N;;;;0063;
-`
 
 func TestParseLine(t *testing.T) {
 	rune, name, words := ParseLine(lineLetterA) // ➊
@@ -64,6 +55,45 @@ func TestParseLineWithHyphenAndField10(t *testing.T) {
 				!words.Equal(tc.words) {
 				t.Errorf("\nParseLine(%q)\n-> (%q, %q, %q)", // ➎
 					tc.line, char, name, words)
+			}
+		})
+	}
+}
+
+const lines3Dto43 = `
+003D;EQUALS SIGN;Sm;0;ON;;;;;N;;;;;
+003E;GREATER-THAN SIGN;Sm;0;ON;;;;;Y;;;;;
+003F;QUESTION MARK;Po;0;ON;;;;;N;;;;;
+0040;COMMERCIAL AT;Po;0;ON;;;;;N;;;;;
+0041;LATIN CAPITAL LETTER A;Lu;0;L;;;;;N;;;;0061;
+0042;LATIN CAPITAL LETTER B;Lu;0;L;;;;;N;;;;0062;
+0043;LATIN CAPITAL LETTER C;Lu;0;L;;;;;N;;;;0063;
+`
+
+func TestFilter(t *testing.T) {
+	var testCases = []struct { // ➊
+		query string
+		want  [][3]string
+	}{ // ➋
+		{"ZZZZZZ", [][3]string{}},
+		{"MARK", [][3]string{
+			{"U+003F", "?", "QUESTION MARK"},
+		}},
+		{"SIGN", [][3]string{
+			{"U+003D", "=", "EQUALS SIGN"},
+			{"U+003E", ">", "GREATER-THAN SIGN"},
+		}},
+		{"GREATER-THAN", [][3]string{
+			{"U+003E", ">", "GREATER-THAN SIGN"},
+		}},
+	}
+	for _, tc := range testCases { // ➌
+		t.Run(tc.query, func(t *testing.T) {
+			text := strings.NewReader(lines3Dto43)
+			got := filter(text, tc.query) // ➍
+			if !reflect.DeepEqual(tc.want, got) {
+				t.Errorf("query: %q\twant: %q\tgot: %q", // ➎
+					tc.query, tc.want, got)
 			}
 		})
 	}

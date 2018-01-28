@@ -31,11 +31,12 @@ func ParseLine(line string) (rune, string, wordset.Set) {
 	return rune(code), name, words
 }
 
-// filter returns a list with the codepoint, the character and
-// the name of the Unicode characters whose name cointain all
-// words in the query.
+// filter returns a list where each item is a [3]string with the
+// U+XXXX codepoint, the character (as a string) and the name of the
+// Unicode characters whose name cointains all words in the query.
 func filter(text io.Reader, query string) [][3]string {
-	var result [][3]string
+	result := [][3]string{}
+	query = strings.Replace(query, "-", " ", -1)
 	terms := wordset.MakeFromText(query)
 	scanner := bufio.NewScanner(text)
 	for scanner.Scan() {
