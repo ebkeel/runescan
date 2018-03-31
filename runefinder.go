@@ -12,21 +12,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/standupdev/wordset"
+	"github.com/standupdev/strset"
 )
 
 // ParseLine parses a line in the UnicodeData.txt file returning
 // the rune, the name and a set of words build from the name.
-func ParseLine(line string) (rune, string, wordset.Set) {
+func ParseLine(line string) (rune, string, strset.Set) {
 	fields := strings.Split(line, ";")
 	code, _ := strconv.ParseInt(fields[0], 16, 32)
 	name := fields[1]
 	wordStr := strings.Replace(fields[1], "-", " ", -1)
-	words := wordset.MakeFromText(wordStr)
+	words := strset.MakeFromText(wordStr)
 	if fields[10] != "" { // ➊
 		name += fmt.Sprintf(" (%s)", fields[10])
 		wordStr = strings.Replace(fields[10], "-", " ", -1)
-		words.Update(wordset.MakeFromText(wordStr))
+		words.UnionUpdate(strset.MakeFromText(wordStr))
 	}
 	return rune(code), name, words
 }
@@ -37,7 +37,7 @@ func ParseLine(line string) (rune, string, wordset.Set) {
 func filter(text io.Reader, query string) [][3]string {
 	result := [][3]string{}
 	query = strings.Replace(query, "-", " ", -1)
-	terms := wordset.MakeFromText(query)
+	terms := strset.MakeFromText(strings.ToUpper(query))
 	scanner := bufio.NewScanner(text)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -45,7 +45,7 @@ func filter(text io.Reader, query string) [][3]string {
 			continue
 		}
 		char, name, wordsName := ParseLine(line) // ➊
-		if terms.IsSubSetOf(wordsName) {         // ➋
+		if terms.SubsetOf(wordsName) {         // ➋
 			result = append(result,
 				[3]string{fmt.Sprintf("U+%04X", char),
 					string(char), name})

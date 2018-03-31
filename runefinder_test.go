@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/standupdev/wordset"
+	"github.com/standupdev/strset"
 )
 
 const lineLetterA = "0041;LATIN CAPITAL LETTER A;Lu;0;L;;;;;N;;;;0061;"
@@ -24,7 +24,7 @@ func TestParseLine(t *testing.T) {
 	if name != nameA {
 		t.Errorf("Want: %q; got: %q", nameA, name)
 	}
-	wordsA := wordset.MakeFromText(nameA) // ➋
+	wordsA := strset.MakeFromText(nameA) // ➋
 	if !wordsA.Equal(words) {             // ➌
 		t.Errorf("\n\tWant: %q\n\tgot: %q", wordsA, words) // ➍
 	}
@@ -35,17 +35,17 @@ func TestParseLineWithHyphenAndField10(t *testing.T) {
 		line  string
 		char  rune
 		name  string
-		words wordset.Set
+		words strset.Set
 	}{ // ➋
 		{"0021;EXCLAMATION MARK;Po;0;ON;;;;;N;;;;;",
 			'!', "EXCLAMATION MARK",
-			wordset.MakeFromText("EXCLAMATION MARK")},
+			strset.MakeFromText("EXCLAMATION MARK")},
 		{"002D;HYPHEN-MINUS;Pd;0;ES;;;;;N;;;;;",
 			'-', "HYPHEN-MINUS",
-			wordset.MakeFromText("HYPHEN MINUS")},
+			strset.MakeFromText("HYPHEN MINUS")},
 		{"0027;APOSTROPHE;Po;0;ON;;;;;N;APOSTROPHE-QUOTE;;;",
 			'\'', "APOSTROPHE (APOSTROPHE-QUOTE)",
-			wordset.MakeFromText("APOSTROPHE QUOTE")},
+			strset.MakeFromText("APOSTROPHE QUOTE")},
 	}
 
 	for _, tc := range testCases { // ➌
