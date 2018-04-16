@@ -44,8 +44,8 @@ func filter(text io.Reader, query string) [][3]string {
 		if strings.TrimSpace(line) == "" {
 			continue
 		}
-		char, name, wordsName := ParseLine(line) // ➊
-		if terms.SubsetOf(wordsName) {         // ➋
+		char, name, nameWords := ParseLine(line) // ➊
+		if terms.SubsetOf(nameWords) {           // ➋
 			result = append(result,
 				[3]string{fmt.Sprintf("U+%04X", char),
 					string(char), name})
