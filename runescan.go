@@ -26,7 +26,7 @@ func ParseLine(line string) (rune, string, strset.Set) {
 	if fields[10] != "" { // ➊
 		name += fmt.Sprintf(" (%s)", fields[10])
 		wordStr = strings.Replace(fields[10], "-", " ", -1)
-		words.UnionUpdate(strset.MakeFromText(wordStr))
+		words.AddAll(strings.Fields(wordStr)...)
 	}
 	return rune(code), name, words
 }
