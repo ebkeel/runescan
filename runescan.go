@@ -23,7 +23,7 @@ func ParseLine(line string) (rune, string, strset.Set) {
 	name := fields[1]
 	wordStr := strings.Replace(fields[1], "-", " ", -1)
 	words := strset.MakeFromText(wordStr)
-	if fields[10] != "" { // ➊
+	if fields[10] != "" {
 		name += fmt.Sprintf(" (%s)", fields[10])
 		wordStr = strings.Replace(fields[10], "-", " ", -1)
 		words.AddAll(strings.Fields(wordStr)...)
@@ -44,8 +44,8 @@ func filter(text io.Reader, query string) [][3]string {
 		if strings.TrimSpace(line) == "" {
 			continue
 		}
-		char, name, nameWords := ParseLine(line) // ➊
-		if terms.SubsetOf(nameWords) {           // ➋
+		char, name, nameWords := ParseLine(line)
+		if terms.SubsetOf(nameWords) {
 			result = append(result,
 				[3]string{fmt.Sprintf("U+%04X", char),
 					string(char), name})

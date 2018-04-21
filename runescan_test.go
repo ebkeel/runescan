@@ -25,7 +25,7 @@ func TestParseLine(t *testing.T) {
 		t.Errorf("Want: %q; got: %q", nameA, name)
 	}
 	wordsA := strset.MakeFromText(nameA) // ➋
-	if !wordsA.Equal(words) {             // ➌
+	if !wordsA.Equal(words) {            // ➌
 		t.Errorf("\n\tWant: %q\n\tgot: %q", wordsA, words) // ➍
 	}
 }
